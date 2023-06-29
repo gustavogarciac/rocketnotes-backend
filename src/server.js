@@ -1,6 +1,7 @@
 //Importing Express Async Errors
 require("express-async-errors")
 const AppError = require("./utils/AppError")
+const migrationsRun = require("./database/sqlite/migrations")
 //Importing Express:
 const express = require("express")
 //Initializating express:
@@ -9,7 +10,8 @@ const app = express()
 //Routes configuration
 app.use(express.json())
 const routes = require("./routes")
-app.use(routes)
+migrationsRun()
+app.use(routes);
 
 app.use(( error, request, response, next ) => {
   if(error instanceof AppError) {
@@ -26,6 +28,7 @@ app.use(( error, request, response, next ) => {
     message: "Internal server error"
   })
 })
+
 
 //Port settings
 const port = 3333;
