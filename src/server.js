@@ -1,40 +1,42 @@
 //Importing Express Async Errors
-require("express-async-errors")
-const AppError = require("./utils/AppError")
-const uploadConfig = require("./configs/upload")
-const migrationsRun = require("./database/sqlite/migrations")
+require("express-async-errors");
+require("dotenv").config();
+const AppError = require("./utils/AppError");
+const uploadConfig = require("./configs/upload");
+const migrationsRun = require("./database/sqlite/migrations");
 
-const cors = require("cors")
-const express = require("express")
+const cors = require("cors");
+const express = require("express");
 //Initializating express:
-const app = express()
+const app = express();
 
-app.use(cors())
+app.use(cors());
 //Routes configuration
-app.use(express.json())
-const routes = require("./routes")
-migrationsRun()
+app.use(express.json());
+const routes = require("./routes");
+migrationsRun();
 
-app.use("/files", express.static(uploadConfig));
+app.use("/files", express.static(uploadConfig.UPLOADS_FOLDER));
 app.use(routes);
 
-app.use(( error, request, response, next ) => {
-  if(error instanceof AppError) {
+app.use((error, request, response, next) => {
+  if (error instanceof AppError) {
     return response.status(error.statusCode).json({
       status: "error",
-      message: error.message
-    })
+      message: error.message,
+    });
   }
 
   console.error(error);
-  
+
   return response.status(500).json({
     status: "error",
-    message: "Internal server error"
-  })
-})
-
+    message: "Internal server error",
+  });
+});
 
 //Port settings
-const port = 3333;
-app.listen(port, () => console.log(`Inicializando o servidor na porta ${port}`))
+const port = process.env.PORT || 3333;
+app.listen(port, () =>
+  console.log(`Inicializando o servidor na porta ${port}`)
+);
